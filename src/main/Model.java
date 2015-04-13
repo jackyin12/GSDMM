@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import Common.FileUtil;
-import org.json.JSONObject;
 
 public class Model{
 	protected int K; 
@@ -174,11 +173,8 @@ public class Model{
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
 				(new FileOutputStream(documentsJsonPath), "UTF-8"));
 		for(int d=0; d < documentSet.documentNum; d++){
-			JSONObject obj = new JSONObject();
 			int topic = z[d];
-			obj.put("trueCluster", documentSet.clusterNoArray[d]);
-			obj.put("predictedCluster", topic);
-			writer.write(obj + "\n");
+			writer.write(topic + "\n");
 		}
 		writer.flush();
 		writer.close();

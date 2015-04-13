@@ -28,11 +28,11 @@ public class GSDMM
 	}
 	public static void main(String args[]) throws Exception
 	{
-		int K = 50;
+		int K = 200;
 		double alpha = 0.1;
 		double beta = 0.1;
 		int iterNum = 10;
-		String dataset = "TREC.txt";
+		String dataset = "TREC";
 		GSDMM gsdmm = new GSDMM(K, alpha, beta, iterNum, dataset);
 		
 		long startTime = System.currentTimeMillis();				

@@ -32,13 +32,13 @@ public class GSDMM
 		double alpha = 0.1;
 		double beta = 0.1;
 		int iterNum = 10;
-		String dataset = "TREC";
+		String dataset = "Tweet";
 		GSDMM gsdmm = new GSDMM(K, alpha, beta, iterNum, dataset);
 		
 		long startTime = System.currentTimeMillis();				
 		gsdmm.getDocuments();
 		long endTime = System.currentTimeMillis();
-		System.out.println("getDocuments, Time Used:" + (endTime-startTime)/1000.0 + "s");
+		System.out.println("getDocuments Time Used:" + (endTime-startTime)/1000.0 + "s");
 		
 		gsdmm.runGSDMM();
 	}
@@ -59,12 +59,12 @@ public class GSDMM
 		model.intialize(documentSet);
 		model.gibbsSampling(documentSet, iterNum);
 		long endTime = System.currentTimeMillis();
-		System.out.println("gibbsSampling, Time Used:" + (endTime-startTime)/1000.0 + "s");
+		System.out.println("gibbsSampling Time Used:" + (endTime-startTime)/1000.0 + "s");
 		
 		startTime = System.currentTimeMillis();				
 		model.output(documentSet, outputPath);
 		endTime = System.currentTimeMillis();
-		System.out.println("output, Time Used:" + (endTime-startTime)/1000.0 + "s");
+		System.out.println("output Time Used:" + (endTime-startTime)/1000.0 + "s");
 		
 		System.out.println("Final Done");
 	}

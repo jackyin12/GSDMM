@@ -10,14 +10,17 @@ public class DocumentSet{
 	protected int documentNum;
 	List<Document> documents = new ArrayList<Document>();
 	
-	public DocumentSet(String dataDir, HashMap<String, Integer> wordToIdMap) throws JSONException {
+	public DocumentSet(String dataDir, HashMap<String, Integer> wordToIdMap) 
+						throws JSONException {
 		ArrayList<String> lines = new ArrayList<String>();
 		FileUtil.readLines(dataDir, lines);		
+		
 		this.documentNum = lines.size();
+		String line;
 		for(int lineNo = 0; lineNo < lines.size(); lineNo++) {
-			String line = lines.get(lineNo);
+			line = lines.get(lineNo);
 			JSONObject obj = new JSONObject(line);
-		    String text = obj.getString("textCleaned");
+		    String text = obj.getString("text");
 		    Document document = new Document(text, wordToIdMap);
 		    documents.add(document);	
 		}

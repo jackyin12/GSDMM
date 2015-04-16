@@ -3,6 +3,7 @@ package main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import Common.FileUtil;
 
 public class Document {
@@ -17,7 +18,7 @@ public class Document {
 		FileUtil.tokenize(text, tokens);
 		
 		for(int i = 0; i < tokens.size(); i++) {
-			String token = tokens.get(i).toLowerCase();
+			String token = tokens.get(i);
 			int tokenId;
 			if (!wordToIdMap.containsKey(token)) {
 				tokenId = V++;
@@ -36,9 +37,9 @@ public class Document {
 		wordIdArray = new int[wordNum];
 		wordFreArray = new int[wordNum];
 		int w = 0;
-		for(Map.Entry<Integer, Integer> entry: wordFreMap.entrySet()){
-			wordIdArray[w] = entry.getKey();
-			wordFreArray[w] = entry.getValue();
+		for(Map.Entry<Integer, Integer> word: wordFreMap.entrySet()){
+			wordIdArray[w] = word.getKey();
+			wordFreArray[w] = word.getValue();
 			w++;
 		}
 	}

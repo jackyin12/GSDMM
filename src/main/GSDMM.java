@@ -28,11 +28,11 @@ public class GSDMM
 	}
 	public static void main(String args[]) throws Exception
 	{
-		int K = 200;
+		int K = 20;
 		double alpha = 0.1;
 		double beta = 0.1;
 		int iterNum = 10;
-		String dataset = "Tweet";
+		String dataset = "20ng";
 		GSDMM gsdmm = new GSDMM(K, alpha, beta, iterNum, dataset);
 		
 		long startTime = System.currentTimeMillis();				
@@ -57,7 +57,7 @@ public class GSDMM
 		
 		long startTime = System.currentTimeMillis();		
 		model.intialize(documentSet);
-		model.gibbsSampling(documentSet, iterNum);
+		model.gibbsSampling(documentSet);
 		long endTime = System.currentTimeMillis();
 		System.out.println("gibbsSampling Time Used:" + (endTime-startTime)/1000.0 + "s");
 		

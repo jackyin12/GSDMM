@@ -48,53 +48,53 @@ public class Model{
 	}
 	public void intialize(DocumentSet documentSet)
 	{
-		D = documentSet.documentNum;
+		D = documentSet.D;
 		z = new int[D];
 		for(int d = 0; d < D; d++){
 			Document document = documentSet.documents.get(d);
-			int clusterNo = (int) (K * Math.random());
-			z[d] = clusterNo;
-			m_z[clusterNo]++;
+			int cluster = (int) (K * Math.random());
+			z[d] = cluster;
+			m_z[cluster]++;
 			for(int w = 0; w < document.wordNum; w++){
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
-				n_zv[clusterNo][wordNo] += wordFre; 
-				n_z[clusterNo] += wordFre; 
+				n_zv[cluster][wordNo] += wordFre; 
+				n_z[cluster] += wordFre; 
 			}
 		}
 	}
-	public void gibbsSampling(DocumentSet documentSet, int iterNum)
+	public void gibbsSampling(DocumentSet documentSet)
 	{
 		for(int i = 0; i < iterNum; i++){
 			for(int d = 0; d < D; d++){
 				Document document = documentSet.documents.get(d);
-				int clusterNo = z[d];
-				m_z[clusterNo]--;
+				int cluster = z[d];
+				m_z[cluster]--;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					n_zv[clusterNo][wordNo] -= wordFre;
-					n_z[clusterNo] -= wordFre;
+					n_zv[cluster][wordNo] -= wordFre;
+					n_z[cluster] -= wordFre;
 				}
 
-				clusterNo = sampleClusterNo(d, document);
+				cluster = sampleCluster(d, document);
 				
-				z[d] = clusterNo;
-				m_z[clusterNo]++;
+				z[d] = cluster;
+				m_z[cluster]++;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					n_zv[clusterNo][wordNo] += wordFre; 
-					n_z[clusterNo] += wordFre; 
+					n_zv[cluster][wordNo] += wordFre; 
+					n_z[cluster] += wordFre; 
 				}
 			}
 		}
 	}
 
-	private int sampleClusterNo(int d, Document document)
+	private int sampleCluster(int d, Document document)
 	{ 
 		double[] p = new double[K];
-		int[] overFlowCount = new int[K];
+		int[] overflowCount = new int[K];
 
 		for(int k = 0; k < K; k++){
 			p[k] = (m_z[k] + alpha) / (D - 1 + alpha0);
@@ -104,52 +104,51 @@ public class Model{
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
 				for(int j = 0; j < wordFre; j++){
-					double tmp = (n_zv[k][wordNo] + beta + j) 
-								 / (n_z[k] + beta0 + i);
+					valueOfRule2 = isOverFlow(valueOfRule2, overflowCount, k); 
+					valueOfRule2 *= (n_zv[k][wordNo] + beta + j) 
+							 / (n_z[k] + beta0 + i);
 					i++;
-					valueOfRule2 *= tmp;
-					valueOfRule2 = isOverFlow(valueOfRule2, overFlowCount, k); 
 				}
 			}
 			p[k] *= valueOfRule2;			
 		}
 		
-		reComputeProbs(p, overFlowCount, K);
+		reComputeProbs(p, overflowCount, K);
 
 		for(int k = 1; k < K; k++){
 			p[k] += p[k - 1];
 		}
 		double thred = Math.random() * p[K - 1];
-		int kchoosed;
-		for(kchoosed = 0; kchoosed < K; kchoosed++){
-			if(thred < p[kchoosed]){
+		int kChoosed;
+		for(kChoosed = 0; kChoosed < K; kChoosed++){
+			if(thred < p[kChoosed]){
 				break;
 			}
 		}
 		
-		return kchoosed;
+		return kChoosed;
 	}
 	
-	private void reComputeProbs(double[] p, int[] overFlowCount, int K)
+	private void reComputeProbs(double[] p, int[] overflowCount, int K)
 	{
-		int max = overFlowCount[0];
+		int max = overflowCount[0];
 		for(int k = 1; k < K; k++){
-			if(overFlowCount[k] > max && p[k] > 0){
-				max = overFlowCount[k];
+			if(overflowCount[k] > max && p[k] > 0){
+				max = overflowCount[k];
 			}
 		}
 		
 		for(int k = 0; k < K; k++){			
 			if(p[k] > 0){
-				p[k] = p[k] * Math.pow(1e150, overFlowCount[k] - max);
+				p[k] = p[k] * Math.pow(1e150, overflowCount[k] - max);
 			}
 		}		
 	}
 
-	private double isOverFlow(double valueOfRule2, int[] overFlowCount, int k)
+	private double isOverFlow(double valueOfRule2, int[] overflowCount, int k)
 	{
 		if(valueOfRule2 < 1e-150){
-			overFlowCount[k]--;
+			overflowCount[k]--;
 			return valueOfRule2 * 1e150;
 		}
 		return valueOfRule2;
@@ -169,10 +168,10 @@ public class Model{
 	public void outputClusteringResult(String outputDir, 
 			DocumentSet documentSet) throws Exception
 	{
-		String documentsJsonPath = outputDir + this.dataset + "ClusteringResult" + ".txt";
+		String outputPath = outputDir + this.dataset + "ClusteringResult" + ".txt";
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
-				(new FileOutputStream(documentsJsonPath), "UTF-8"));
-		for(int d=0; d < documentSet.documentNum; d++){
+				(new FileOutputStream(outputPath), "UTF-8"));
+		for(int d=0; d < documentSet.D; d++){
 			int topic = z[d];
 			writer.write(topic + "\n");
 		}

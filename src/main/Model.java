@@ -1,9 +1,9 @@
 package main;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import Common.FileUtil;
 
 public class Model{
 	protected int K; 
@@ -154,15 +154,18 @@ public class Model{
 		return valueOfRule2;
 	}
 
-	public void output(DocumentSet documentSet, String outputPath)
+	public void output(DocumentSet documentSet, String outputPath) throws Exception
 	{
 		String outputDir = outputPath + dataset + ParametersStr + "/";
-		FileUtil.makeDir(outputDir);
-		try{
-			outputClusteringResult(outputDir, documentSet);
-		} catch (Exception e){
-			e.printStackTrace();
+		
+		File file = new File(outputDir);
+		if(!file.exists()){
+			if(!file.mkdirs()){
+				System.out.println("Failed to create directory:" + outputDir);
+			}
 		}
+		
+		outputClusteringResult(outputDir, documentSet);
 	}
 
 	public void outputClusteringResult(String outputDir, 

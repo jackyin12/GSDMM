@@ -1,7 +1,5 @@
 package main;
-import java.io.*;
 import java.util.HashMap;
-import org.json.JSONException;
 
 public class GSDMM
 {
@@ -43,13 +41,13 @@ public class GSDMM
 		gsdmm.runGSDMM();
 	}
 	
-	public void getDocuments() throws JSONException
+	public void getDocuments() throws Exception
 	{
 		documentSet = new DocumentSet(dataDir + dataset, wordToIdMap);
 		V = wordToIdMap.size();
 	}
 	
-	public void runGSDMM() throws IOException
+	public void runGSDMM() throws Exception
 	{
 		String ParametersStr = "K"+K+"iterNum"+ iterNum +"alpha" + String.format("%.3f", alpha)
 								+ "beta" + String.format("%.3f", beta);

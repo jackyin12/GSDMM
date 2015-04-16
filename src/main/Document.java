@@ -1,25 +1,24 @@
 package main;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import Common.FileUtil;
+import java.util.StringTokenizer;
 
 public class Document {
 	protected int[] wordIdArray;
 	protected int[] wordFreArray;
 	protected int wordNum = 0;
+	
 	public Document(String text, HashMap<String, Integer> wordToIdMap) 
 	{
 		int V = wordToIdMap.size();
 		HashMap<Integer, Integer> wordFreMap = new HashMap<Integer, Integer>(); 
-		ArrayList<String> tokens = new ArrayList<String>();
-		FileUtil.tokenize(text, tokens);
+		StringTokenizer st = new StringTokenizer(text);
+		String token;
+		int tokenId;
 		
-		for(int i = 0; i < tokens.size(); i++) {
-			String token = tokens.get(i);
-			int tokenId;
+		while(st.hasMoreTokens()){
+			token = st.nextToken();
 			if (!wordToIdMap.containsKey(token)) {
 				tokenId = V++;
 				wordToIdMap.put(token, tokenId);
@@ -33,6 +32,7 @@ public class Document {
 				wordFreMap.put(tokenId, wordFreMap.get(tokenId) + 1);
 			}
 		}
+		
 		wordNum = wordFreMap.size();
 		wordIdArray = new int[wordNum];
 		wordFreArray = new int[wordNum];

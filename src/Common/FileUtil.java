@@ -10,7 +10,7 @@ public class FileUtil
 	{
 		File file = new File(fileName);
 		if(!file.exists()){
-			if(!file.mkdir()){
+			if(!file.mkdirs()){
 				System.out.println("Failed to create directory:" + fileName);
 			}
 		}

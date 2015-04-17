@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 public class Document {
-	protected int[] wordIdArray;
-	protected int[] wordFreArray;
-	protected int wordNum = 0;
+	int[] wordIdArray;
+	int[] wordFreArray;
+	int wordNum = 0;
 	
 	public Document(String text, HashMap<String, Integer> wordToIdMap) 
 	{
@@ -33,13 +33,13 @@ public class Document {
 			}
 		}
 		
-		wordNum = wordFreMap.size();
-		wordIdArray = new int[wordNum];
-		wordFreArray = new int[wordNum];
+		this.wordNum = wordFreMap.size();
+		this.wordIdArray = new int[this.wordNum];
+		this.wordFreArray = new int[this.wordNum];
 		int w = 0;
 		for(Map.Entry<Integer, Integer> word: wordFreMap.entrySet()){
-			wordIdArray[w] = word.getKey();
-			wordFreArray[w] = word.getValue();
+			this.wordIdArray[w] = word.getKey();
+			this.wordFreArray[w] = word.getValue();
 			w++;
 		}
 	}

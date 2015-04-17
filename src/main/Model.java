@@ -6,21 +6,23 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
 public class Model{
-	protected int K; 
-	protected double alpha;
-	protected double beta;
-	protected String dataset;
-	protected String ParametersStr;
-	protected int V; 
-	protected int D; 
-	protected int iterNum; 
-	protected double alpha0;
-	protected double beta0;
-	protected double[][] phi_zv;
-	protected int[] z; 
-	protected int[] m_z; 
-	protected int[][] n_zv;
-	protected int[] n_z; 
+	int K; 
+	double alpha;
+	double beta;
+	String dataset;
+	String ParametersStr;
+	int V; 
+	int D; 
+	int iterNum; 
+	double alpha0;
+	double beta0;
+	double[][] phi_zv;
+	int[] z; 
+	int[] m_z; 
+	int[][] n_zv;
+	int[] n_z; 
+	double smallDouble = 1e-150;
+	double largeDouble = 1e150;
 
 	public Model(int K, int V, int iterNum, double alpha, double beta, 
 			String dataset, String ParametersStr)
@@ -35,57 +37,57 @@ public class Model{
 		this.alpha0 = K * alpha;
 		this.beta0 = V * beta;
 		
-		m_z = new int[K];
-		n_z = new int[K];
-		n_zv = new int[K][V];
+		this.m_z = new int[K];
+		this.n_z = new int[K];
+		this.n_zv = new int[K][V];
 		for(int k = 0; k < K; k++){
-			n_z[k] = 0;
-			m_z[k] = 0;
+			this.n_z[k] = 0;
+			this.m_z[k] = 0;
 			for(int t = 0; t < V; t++){
-				n_zv[k][t] = 0;
+				this.n_zv[k][t] = 0;
 			}
 		}
 	}
 	public void intialize(DocumentSet documentSet)
 	{
-		D = documentSet.D;
-		z = new int[D];
-		for(int d = 0; d < D; d++){
+		this.D = documentSet.D;
+		this.z = new int[this.D];
+		for(int d = 0; d < this.D; d++){
 			Document document = documentSet.documents.get(d);
-			int cluster = (int) (K * Math.random());
-			z[d] = cluster;
-			m_z[cluster]++;
+			int cluster = (int) (this.K * Math.random());
+			this.z[d] = cluster;
+			this.m_z[cluster]++;
 			for(int w = 0; w < document.wordNum; w++){
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
-				n_zv[cluster][wordNo] += wordFre; 
-				n_z[cluster] += wordFre; 
+				this.n_zv[cluster][wordNo] += wordFre; 
+				this.n_z[cluster] += wordFre; 
 			}
 		}
 	}
 	public void gibbsSampling(DocumentSet documentSet)
 	{
-		for(int i = 0; i < iterNum; i++){
-			for(int d = 0; d < D; d++){
+		for(int i = 0; i < this.iterNum; i++){
+			for(int d = 0; d < this.D; d++){
 				Document document = documentSet.documents.get(d);
-				int cluster = z[d];
-				m_z[cluster]--;
+				int cluster = this.z[d];
+				this.m_z[cluster]--;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					n_zv[cluster][wordNo] -= wordFre;
-					n_z[cluster] -= wordFre;
+					this.n_zv[cluster][wordNo] -= wordFre;
+					this.n_z[cluster] -= wordFre;
 				}
 
 				cluster = sampleCluster(d, document);
 				
-				z[d] = cluster;
-				m_z[cluster]++;
+				this.z[d] = cluster;
+				this.m_z[cluster]++;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					n_zv[cluster][wordNo] += wordFre; 
-					n_z[cluster] += wordFre; 
+					this.n_zv[cluster][wordNo] += wordFre; 
+					this.n_z[cluster] += wordFre; 
 				}
 			}
 		}
@@ -93,35 +95,38 @@ public class Model{
 
 	private int sampleCluster(int d, Document document)
 	{ 
-		double[] p = new double[K];
-		int[] overflowCount = new int[K];
+		double[] prob = new double[this.K];
+		int[] overflowCount = new int[this.K];
 
-		for(int k = 0; k < K; k++){
-			p[k] = (m_z[k] + alpha) / (D - 1 + alpha0);
+		for(int k = 0; k < this.K; k++){
+			prob[k] = (this.m_z[k] + this.alpha) / (this.D - 1 + this.alpha0);
 			double valueOfRule2 = 1.0;
 			int i = 0;
 			for(int w=0; w < document.wordNum; w++){
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
 				for(int j = 0; j < wordFre; j++){
-					valueOfRule2 = isOverFlow(valueOfRule2, overflowCount, k); 
-					valueOfRule2 *= (n_zv[k][wordNo] + beta + j) 
-							 / (n_z[k] + beta0 + i);
+					if(valueOfRule2 < this.smallDouble){
+						overflowCount[k]--;
+						valueOfRule2 *= this.largeDouble;
+					}
+					valueOfRule2 *= (this.n_zv[k][wordNo] + this.beta + j) 
+							 / (this.n_z[k] + this.beta0 + i);
 					i++;
 				}
 			}
-			p[k] *= valueOfRule2;			
+			prob[k] *= valueOfRule2;			
 		}
 		
-		reComputeProbs(p, overflowCount, K);
+		reComputeProbs(prob, overflowCount, this.K);
 
-		for(int k = 1; k < K; k++){
-			p[k] += p[k - 1];
+		for(int k = 1; k < this.K; k++){
+			prob[k] += prob[k - 1];
 		}
-		double thred = Math.random() * p[K - 1];
+		double thred = Math.random() * prob[this.K - 1];
 		int kChoosed;
-		for(kChoosed = 0; kChoosed < K; kChoosed++){
-			if(thred < p[kChoosed]){
+		for(kChoosed = 0; kChoosed < this.K; kChoosed++){
+			if(thred < prob[kChoosed]){
 				break;
 			}
 		}
@@ -129,29 +134,20 @@ public class Model{
 		return kChoosed;
 	}
 	
-	private void reComputeProbs(double[] p, int[] overflowCount, int K)
+	private void reComputeProbs(double[] prob, int[] overflowCount, int K)
 	{
-		int max = overflowCount[0];
-		for(int k = 1; k < K; k++){
-			if(overflowCount[k] > max && p[k] > 0){
+		int max = Integer.MIN_VALUE;
+		for(int k = 0; k < K; k++){
+			if(overflowCount[k] > max && prob[k] > 0){
 				max = overflowCount[k];
 			}
 		}
 		
 		for(int k = 0; k < K; k++){			
-			if(p[k] > 0){
-				p[k] = p[k] * Math.pow(1e150, overflowCount[k] - max);
+			if(prob[k] > 0){
+				prob[k] = prob[k] * Math.pow(this.largeDouble, overflowCount[k] - max);
 			}
 		}		
-	}
-
-	private double isOverFlow(double valueOfRule2, int[] overflowCount, int k)
-	{
-		if(valueOfRule2 < 1e-150){
-			overflowCount[k]--;
-			return valueOfRule2 * 1e150;
-		}
-		return valueOfRule2;
 	}
 
 	public void output(DocumentSet documentSet, String outputPath) throws Exception
@@ -168,14 +164,13 @@ public class Model{
 		outputClusteringResult(outputDir, documentSet);
 	}
 
-	public void outputClusteringResult(String outputDir, 
-			DocumentSet documentSet) throws Exception
+	public void outputClusteringResult(String outputDir, DocumentSet documentSet) throws Exception
 	{
-		String outputPath = outputDir + this.dataset + "ClusteringResult" + ".txt";
+		String outputPath = outputDir + this.dataset + "ClusteringResult.txt";
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
 				(new FileOutputStream(outputPath), "UTF-8"));
-		for(int d=0; d < documentSet.D; d++){
-			int topic = z[d];
+		for(int d = 0; d < documentSet.D; d++){
+			int topic = this.z[d];
 			writer.write(topic + "\n");
 		}
 		writer.flush();

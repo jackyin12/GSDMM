@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.json.JSONObject;
 
 public class DocumentSet{
-	protected int D = 0;
+	int D = 0;
 	ArrayList<Document> documents = new ArrayList<Document>();
 	
 	public DocumentSet(String dataDir, HashMap<String, Integer> wordToIdMap) 
@@ -20,7 +20,7 @@ public class DocumentSet{
 			JSONObject obj = new JSONObject(line);
 			String text = obj.getString("text");
 			Document document = new Document(text, wordToIdMap);
-			documents.add(document);
+			this.documents.add(document);
 		}
 		
 		in.close();

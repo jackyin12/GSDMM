@@ -3,17 +3,17 @@ import java.util.HashMap;
 
 public class GSDMM
 {
-	protected int K;
-	protected double alpha;
-	protected double beta;
-	protected int iterNum;
-	protected String dataset;
+	int K;
+	double alpha;
+	double beta;
+	int iterNum;
+	String dataset;
 	
-	protected HashMap<String, Integer> wordToIdMap;
-	protected int V;
-	protected DocumentSet documentSet;
-	protected String dataDir = "data/"; 
-	protected String outputPath = "result/";
+	HashMap<String, Integer> wordToIdMap;
+	int V;
+	DocumentSet documentSet;
+	String dataDir = "data/"; 
+	String outputPath = "result/";
 	
 	public GSDMM(int K, double alpha, double beta, int iterNum, String dataset)
 	{
@@ -38,13 +38,16 @@ public class GSDMM
 		long endTime = System.currentTimeMillis();
 		System.out.println("getDocuments Time Used:" + (endTime-startTime)/1000.0 + "s");
 		
+		startTime = System.currentTimeMillis();	
 		gsdmm.runGSDMM();
+		endTime = System.currentTimeMillis();
+		System.out.println("gibbsSampling Time Used:" + (endTime-startTime)/1000.0 + "s");
 	}
 	
 	public void getDocuments() throws Exception
 	{
-		documentSet = new DocumentSet(dataDir + dataset, wordToIdMap);
-		V = wordToIdMap.size();
+		this.documentSet = new DocumentSet(dataDir + dataset, wordToIdMap);
+		this.V = wordToIdMap.size();
 	}
 	
 	public void runGSDMM() throws Exception
@@ -52,18 +55,8 @@ public class GSDMM
 		String ParametersStr = "K"+K+"iterNum"+ iterNum +"alpha" + String.format("%.3f", alpha)
 								+ "beta" + String.format("%.3f", beta);
 		Model model = new Model(K, V, iterNum,alpha, beta, dataset,  ParametersStr);
-		
-		long startTime = System.currentTimeMillis();		
 		model.intialize(documentSet);
 		model.gibbsSampling(documentSet);
-		long endTime = System.currentTimeMillis();
-		System.out.println("gibbsSampling Time Used:" + (endTime-startTime)/1000.0 + "s");
-		
-		startTime = System.currentTimeMillis();				
 		model.output(documentSet, outputPath);
-		endTime = System.currentTimeMillis();
-		System.out.println("output Time Used:" + (endTime-startTime)/1000.0 + "s");
-		
-		System.out.println("Final Done");
 	}
 }

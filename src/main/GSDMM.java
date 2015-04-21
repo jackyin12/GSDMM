@@ -26,7 +26,7 @@ public class GSDMM
 	}
 	public static void main(String args[]) throws Exception
 	{
-		int K = 20;
+		int K = 50;
 		double alpha = 0.1;
 		double beta = 0.1;
 		int iterNum = 10;

@@ -33,13 +33,13 @@ public class Document {
 			}
 		}
 		
-		this.wordNum = wordFreMap.size();
-		this.wordIdArray = new int[this.wordNum];
-		this.wordFreArray = new int[this.wordNum];
+		wordNum = wordFreMap.size();
+		wordIdArray = new int[wordNum];
+		wordFreArray = new int[wordNum];
 		int w = 0;
 		for(Map.Entry<Integer, Integer> word: wordFreMap.entrySet()){
-			this.wordIdArray[w] = word.getKey();
-			this.wordFreArray[w] = word.getValue();
+			wordIdArray[w] = word.getKey();
+			wordFreArray[w] = word.getValue();
 			w++;
 		}
 	}

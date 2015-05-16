@@ -46,8 +46,8 @@ public class GSDMM
 	
 	public void getDocuments() throws Exception
 	{
-		this.documentSet = new DocumentSet(dataDir + dataset, wordToIdMap);
-		this.V = wordToIdMap.size();
+		documentSet = new DocumentSet(dataDir + dataset, wordToIdMap);
+		V = wordToIdMap.size();
 	}
 	
 	public void runGSDMM() throws Exception

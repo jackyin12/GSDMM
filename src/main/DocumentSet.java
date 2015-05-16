@@ -16,11 +16,11 @@ public class DocumentSet{
 		String line;
 		
 		while((line=in.readLine()) != null){
-			this.D++;
+			D++;
 			JSONObject obj = new JSONObject(line);
 			String text = obj.getString("text");
 			Document document = new Document(text, wordToIdMap);
-			this.documents.add(document);
+			documents.add(document);
 		}
 		
 		in.close();

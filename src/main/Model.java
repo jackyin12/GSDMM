@@ -50,44 +50,44 @@ public class Model{
 	}
 	public void intialize(DocumentSet documentSet)
 	{
-		this.D = documentSet.D;
-		this.z = new int[this.D];
-		for(int d = 0; d < this.D; d++){
+		D = documentSet.D;
+		z = new int[D];
+		for(int d = 0; d < D; d++){
 			Document document = documentSet.documents.get(d);
-			int cluster = (int) (this.K * Math.random());
-			this.z[d] = cluster;
-			this.m_z[cluster]++;
+			int cluster = (int) (K * Math.random());
+			z[d] = cluster;
+			m_z[cluster]++;
 			for(int w = 0; w < document.wordNum; w++){
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
-				this.n_zv[cluster][wordNo] += wordFre; 
-				this.n_z[cluster] += wordFre; 
+				n_zv[cluster][wordNo] += wordFre; 
+				n_z[cluster] += wordFre; 
 			}
 		}
 	}
 	public void gibbsSampling(DocumentSet documentSet)
 	{
-		for(int i = 0; i < this.iterNum; i++){
-			for(int d = 0; d < this.D; d++){
+		for(int i = 0; i < iterNum; i++){
+			for(int d = 0; d < D; d++){
 				Document document = documentSet.documents.get(d);
-				int cluster = this.z[d];
-				this.m_z[cluster]--;
+				int cluster = z[d];
+				m_z[cluster]--;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					this.n_zv[cluster][wordNo] -= wordFre;
-					this.n_z[cluster] -= wordFre;
+					n_zv[cluster][wordNo] -= wordFre;
+					n_z[cluster] -= wordFre;
 				}
 
 				cluster = sampleCluster(d, document);
 				
-				this.z[d] = cluster;
-				this.m_z[cluster]++;
+				z[d] = cluster;
+				m_z[cluster]++;
 				for(int w = 0; w < document.wordNum; w++){
 					int wordNo = document.wordIdArray[w];
 					int wordFre = document.wordFreArray[w];
-					this.n_zv[cluster][wordNo] += wordFre; 
-					this.n_z[cluster] += wordFre; 
+					n_zv[cluster][wordNo] += wordFre; 
+					n_z[cluster] += wordFre; 
 				}
 			}
 		}
@@ -95,37 +95,37 @@ public class Model{
 
 	private int sampleCluster(int d, Document document)
 	{ 
-		double[] prob = new double[this.K];
-		int[] overflowCount = new int[this.K];
+		double[] prob = new double[K];
+		int[] overflowCount = new int[K];
 
-		for(int k = 0; k < this.K; k++){
-			prob[k] = (this.m_z[k] + this.alpha) / (this.D - 1 + this.alpha0);
+		for(int k = 0; k < K; k++){
+			prob[k] = (m_z[k] + alpha) / (D - 1 + alpha0);
 			double valueOfRule2 = 1.0;
 			int i = 0;
 			for(int w=0; w < document.wordNum; w++){
 				int wordNo = document.wordIdArray[w];
 				int wordFre = document.wordFreArray[w];
 				for(int j = 0; j < wordFre; j++){
-					if(valueOfRule2 < this.smallDouble){
+					if(valueOfRule2 < smallDouble){
 						overflowCount[k]--;
-						valueOfRule2 *= this.largeDouble;
+						valueOfRule2 *= largeDouble;
 					}
-					valueOfRule2 *= (this.n_zv[k][wordNo] + this.beta + j) 
-							 / (this.n_z[k] + this.beta0 + i);
+					valueOfRule2 *= (n_zv[k][wordNo] + beta + j) 
+							 / (n_z[k] + beta0 + i);
 					i++;
 				}
 			}
 			prob[k] *= valueOfRule2;			
 		}
 		
-		reComputeProbs(prob, overflowCount, this.K);
+		reComputeProbs(prob, overflowCount, K);
 
-		for(int k = 1; k < this.K; k++){
+		for(int k = 1; k < K; k++){
 			prob[k] += prob[k - 1];
 		}
-		double thred = Math.random() * prob[this.K - 1];
+		double thred = Math.random() * prob[K - 1];
 		int kChoosed;
-		for(kChoosed = 0; kChoosed < this.K; kChoosed++){
+		for(kChoosed = 0; kChoosed < K; kChoosed++){
 			if(thred < prob[kChoosed]){
 				break;
 			}
@@ -145,7 +145,7 @@ public class Model{
 		
 		for(int k = 0; k < K; k++){			
 			if(prob[k] > 0){
-				prob[k] = prob[k] * Math.pow(this.largeDouble, overflowCount[k] - max);
+				prob[k] = prob[k] * Math.pow(largeDouble, overflowCount[k] - max);
 			}
 		}		
 	}
@@ -166,11 +166,11 @@ public class Model{
 
 	public void outputClusteringResult(String outputDir, DocumentSet documentSet) throws Exception
 	{
-		String outputPath = outputDir + this.dataset + "ClusteringResult.txt";
+		String outputPath = outputDir + dataset + "ClusteringResult.txt";
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
 				(new FileOutputStream(outputPath), "UTF-8"));
 		for(int d = 0; d < documentSet.D; d++){
-			int topic = this.z[d];
+			int topic = z[d];
 			writer.write(topic + "\n");
 		}
 		writer.flush();
